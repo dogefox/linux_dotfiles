@@ -107,6 +107,10 @@ alias darkest='xrandr --output eDP-1-1 --brightness 0.2'
 alias light='xrandr --output eDP-1-1 --brightness 0.7'
 alias lighter='xrandr --output eDP-1-1 --brightness 0.9'
 alias lightest='xrandr --output eDP-1-1 --brightness 1.0'
+alias sleep='systemctl suspend'
+
+# limabean vpn connection
+alias limavpn='sudo openvpn --config ~/limavpn.ovpn'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
