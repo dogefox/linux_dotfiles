@@ -2,6 +2,12 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# https://misc.flogisoft.com/bash/tip_colors_and_formatting
+RED='\033[31m'
+GREEN='\e[32m'
+BLUE='\e[34m'
+NC='\e[0m'
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -99,14 +105,119 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-# nico's custom aliases
-alias dcd='docker kill $(docker ps -q)'
+## nico's custom aliases ##
+
+# enable touchpad
+alias mouseon='exec xinput --enable "FocalTechPS/2 FocalTech Touchpad"'
+alias mouseoff='exec xinput disable "FocalTechPS/2 FocalTech Touchpad"'
+
+# screen brightness aliases
 alias dark='xrandr --output eDP-1-1 --brightness 0.4'
 alias darker='xrandr --output eDP-1-1 --brightness 0.3'
 alias darkest='xrandr --output eDP-1-1 --brightness 0.2'
 alias light='xrandr --output eDP-1-1 --brightness 0.7'
 alias lighter='xrandr --output eDP-1-1 --brightness 0.9'
 alias lightest='xrandr --output eDP-1-1 --brightness 1.0'
+alias sleep='systemctl suspend'
+
+# limabean vpn connection alias
+alias limavpn='sudo openvpn --config ~/limavpn.ovpn'
+
+# get my ip
+alias myip='curl icanhazip.com'
+
+alias pepkorjump='ssh cms@197.96.177.1 -p22'
+
+# the ultimate database dump script alias
+#alias mysqldumpking= 'mysqldump -f --single-transaction --skip-lock-tables --log-error=dump-errors.log database_name | pv | gzip > database_name.sql.gz'
+#alias mysqlrestore= 'gunzip < database_name.sql.gz | mysql -uUSER -p -h HOST database_name'
+#alias mysqldumpking= 'mysqldump -f --single-transaction --skip-lock-tables --log-error=dump-errors.log theproshopdb | pv | gzip > theproshopdb.sql.gz'
+
+
+# docker aliases
+alias dcd='docker kill $(docker ps -q)'
+
+# gitbry = git branchcheckout remote.yml yarn build
+# parameter $1 = $branchname
+gitbry() {
+    
+    echo -e "${RED}[CODE REVIEW]${NC} stashing uncommitted work & killing all containers"
+    git stash && dcd
+    echo -e "${BLUE}[CODE REVIEW]${NC} pulling master & fetching branches"
+    git checkout master && git pull && git fetch
+    echo -e "${BLUE}[CODE REVIEW]${NC} checking out $1"
+    git checkout $1 && git pull
+    echo -e "${BLUE}[CODE REVIEW]${NC} upping docker-compose remote"
+    docker-compose -f remote.yml up -d
+    echo -e "${GREEN}[CODE REVIEW]${NC} running build"
+    docker-compose -f remote.yml exec node yarn build
+    echo -e "${BLUE}[CODE REVIEW]${NC} ${GREEN}ready for review${NC}"
+}
+
+# gitbr = git branchcheckout remote.yml - no build process
+# parameter $1 = $branchname
+gitbr() {
+    
+    echo -e "${RED}[CODE REVIEW]${NC} stashing uncommitted work & killing all containers"
+    git stash && dcd
+    echo -e "${BLUE}[CODE REVIEW]${NC} pulling master & fetching branches"
+    git checkout master && git pull && git fetch
+    echo -e "${BLUE}[CODE REVIEW]${NC} checking out $1"
+    git checkout $1 && git pull
+    echo -e "${BLUE}[CODE REVIEW]${NC} upping docker-compose remote"
+    docker-compose -f remote.yml up -d
+    echo -e "${BLUE}[CODE REVIEW]${NC} ${GREEN}ready for review${NC}"
+}
+
+# gitbly = git branchcheckout local (so no remote.yml) yarn build
+# parameter $1 = $branchname
+gitbly() {
+    # https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    RED='\033[31m'
+    GREEN='\e[32m'
+    BLUE='\e[34m'
+    NC='\e[0m'
+    
+    echo -e "${RED}[CODE REVIEW]${NC} stashing uncommitted work & killing all containers"
+    git stash && dcd
+    echo -e "${BLUE}CODE [REVIEW]${NC} pulling master & fetching branches"
+    git checkout master && git pull && git fetch
+    echo -e "${BLUE}[CODE REVIEW]${NC} checking out $1"
+    git checkout $1 && git pull
+    echo -e "${BLUE}[CODE REVIEW]${NC} upping docker-compose remote"
+    docker-compose up -d
+    echo -e "${GREEN}[CODE REVIEW]${NC} running build"
+    #if [ $# -eq 2 ]
+    #then
+    #    #docker-compose -f remote.yml exec node $2 build
+    #    docker-compose exec node yarn build
+    #fi
+    docker-compose exec node yarn build
+    echo -e "${BLUE}[REVIEW]${NC} ${GREEN}ready for review${NC}"
+}
+
+# gitbl = git branchcheckout local (so no remote.yml) without build process
+# parameter $1 = $branchname
+gitbl() {
+    # https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    RED='\033[31m'
+    GREEN='\e[32m'
+    BLUE='\e[34m'
+    NC='\e[0m'
+    
+    echo -e "${RED}[CODE REVIEW]${NC} stashing uncommitted work & killing all containers"
+    git stash && dcd
+    echo -e "${BLUE}CODE [REVIEW]${NC} pulling master & fetching branches"
+    git checkout master && git pull && git fetch
+    echo -e "${BLUE}[CODE REVIEW]${NC} checking out $1"
+    git checkout $1 && git pull
+    echo -e "${BLUE}[CODE REVIEW]${NC} upping docker-compose remote"
+    docker-compose up -d
+    echo -e "${BLUE}[REVIEW]${NC} ${GREEN}ready for review${NC}"
+}
+
+# kubectl alias to roll out update on deployment
+alias kuberollout='kubectl patch deployment $@ -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
